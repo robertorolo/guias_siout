@@ -4,16 +4,24 @@ from selenium.webdriver.common.keys import Keys
 import time
 import sys
 import warnings
+import os.path
 
 if not sys.warnoptions:
     warnings.simplefilter("ignore") 
         
 #definindo planilhas de guis pagas e emitidas
 print('Lendo planilhas de guias emitidas e pagas')
-guias_rela_path = 'relatorio.csv'
-
-#lendo os arquivos
-guias_rela = pd.read_csv(guias_rela_path, sep=';',  encoding = 'utf-8', error_bad_lines=False)
+if os.path.isfile('leitura_parcial.csv'):
+    guias_rela_path = 'leitura_parcial.csv'
+    guias_rela = pd.read_csv(guias_rela_path, sep=';',  encoding = 'utf-8', error_bad_lines=False)
+else:
+    guias_rela_path = 'relatorio.csv'
+    guias_rela = pd.read_csv(guias_rela_path, sep=';',  encoding = 'utf-8', error_bad_lines=False)
+    guias_rela['Número da guia'] = 'N/D'
+    guias_rela['Valor da guia'] = 'N/D'
+    guias_rela['Data da emissão'] = 'N/D'
+    guias_rela['Status'] = 'N/D'
+    guias_rela['CPF/CNPJ'] = 'N/D'
 
 #acessando o siout
 print('Acessando o SIOUT pelo Firefox')
@@ -24,8 +32,8 @@ driver.get('http://www.siout.rs.gov.br/#/')
 username = driver.find_element_by_xpath('//*[@id="login"]')
 password = driver.find_element_by_xpath('//*[@id="password"]')
 
-username.send_keys("***")
-password.send_keys("***")
+username.send_keys("079.949.786-06")
+password.send_keys("Sparta1941")
 
 entrar = driver.find_element_by_xpath('//*[@id="wrap"]/section/div/div[2]/div[1]/div/form/div[3]/button')
 entrar.click()
@@ -47,15 +55,10 @@ pesquisabtn = driver.find_element_by_xpath('//*[@id="wrap"]/section/lm-filtros-p
 limparbtn = driver.find_element_by_xpath('/html/body/div/section/lm-filtros-pesquisa-guias-emitidas/div[1]/div/div/div[2]/div/div/form/div[10]/div/button[1]')
 
 #iterando nas listas de guias
-guias_rela['Número da guia'] = 'N/D'
-guias_rela['Valor da guia'] = 'N/D'
-guias_rela['Data da emissão'] = 'N/D'
-guias_rela['Status'] = 'N/D'
-guias_rela['CPF/CNPJ'] = 'N/D' 
-
 for idx, p in enumerate(guias_rela['Nº de cadastro']):
     
     print('---')
+    print('Indice: {}'.format(idx))
     classi = guias_rela['Classificação'].iloc[idx]
     tipo = guias_rela['Tipo de Intervenção'].iloc[idx]
     fonte = guias_rela['Fonte captação'].iloc[idx]
@@ -118,6 +121,24 @@ for idx, p in enumerate(guias_rela['Nº de cadastro']):
     
     limparbtn.click()
     print('---\n')
+    
+    #salvando uma parcial
+    if idx%20==0 and idx!=0:
+        print('Salvando parcial')
+        guias_rela.iloc[idx:].to_csv('leitura_parcial.csv', sep=';', index=False)
+        
+        if os.path.isfile('escrita_parcial.csv'):
+            p = pd.read_csv('escrita_parcial.csv', sep=';',  encoding = 'utf-8', error_bad_lines=False)
+
+            guias_rela = guias_rela.append(p)
+        
+        guias_rela.iloc[:idx].to_csv('escrita_parcial.csv', sep=';', index=False)
+
+#salvando resultado final
+if os.path.isfile('escrita_parcial.csv'):
+    p = pd.read_csv('escrita_parcial.csv', sep=';',  encoding = 'utf-8', error_bad_lines=False)
+
+    guias_rela = guias_rela.append(p)
 
 colunas = ['Nº de cadastro','Usuário de Água','CPF/CNPJ','Município','Fonte captação','Tipo de Intervenção','Classificação','Status','Número da guia','Data da emissão','Valor da guia']
 guias_rela[colunas].to_csv('relatorio_completo.csv', sep=';', index=False)
