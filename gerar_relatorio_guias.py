@@ -32,8 +32,8 @@ driver.get('http://www.siout.rs.gov.br/#/')
 username = driver.find_element_by_xpath('//*[@id="login"]')
 password = driver.find_element_by_xpath('//*[@id="password"]')
 
-username.send_keys("***")
-password.send_keys("***")
+username.send_keys("079.949.786-06")
+password.send_keys("Sparta1941")
 
 entrar = driver.find_element_by_xpath('//*[@id="wrap"]/section/div/div[2]/div[1]/div/form/div[3]/button')
 entrar.click()
@@ -123,16 +123,18 @@ for idx, p in enumerate(guias_rela['Nº de cadastro']):
     print('---\n')
     
     #salvando uma parcial
-    if idx%20==0 and idx!=0:
-        print('Salvando parcial')
+    if idx%5==0 and idx!=0:
+        print('Salvando parcial\n')
         guias_rela.iloc[idx:].to_csv('leitura_parcial.csv', sep=';', index=False)
         
         if os.path.isfile('escrita_parcial.csv'):
             p = pd.read_csv('escrita_parcial.csv', sep=';',  encoding = 'utf-8', error_bad_lines=False)
 
-            guias_rela = guias_rela.append(p)
+            guias_rela_p = p.append(guias_rela[idx-5:idx])
+            guias_rela_p.to_csv('escrita_parcial.csv', sep=';', index=False)
         
-        guias_rela.iloc[:idx].to_csv('escrita_parcial.csv', sep=';', index=False)
+        else:
+            guias_rela.iloc[:idx].to_csv('escrita_parcial.csv', sep=';', index=False)
 
 #salvando resultado final
 if os.path.isfile('escrita_parcial.csv'):
