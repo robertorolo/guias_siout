@@ -32,8 +32,8 @@ driver.get('http://www.siout.rs.gov.br/#/')
 username = driver.find_element_by_xpath('//*[@id="login"]')
 password = driver.find_element_by_xpath('//*[@id="password"]')
 
-username.send_keys("079.949.786-06")
-password.send_keys("Sparta1941")
+username.send_keys("***")
+password.send_keys("***")
 
 entrar = driver.find_element_by_xpath('//*[@id="wrap"]/section/div/div[2]/div[1]/div/form/div[3]/button')
 entrar.click()
