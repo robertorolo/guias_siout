@@ -11,9 +11,11 @@ if not sys.warnoptions:
         
 #definindo planilhas de guis pagas e emitidas
 print('Lendo planilhas de guias emitidas e pagas')
+lp = False
 if os.path.isfile('leitura_parcial.csv'):
     guias_rela_path = 'leitura_parcial.csv'
     guias_rela = pd.read_csv(guias_rela_path, sep=';',  encoding = 'utf-8', error_bad_lines=False)
+    lp = True
 else:
     guias_rela_path = 'relatorio.csv'
     guias_rela = pd.read_csv(guias_rela_path, sep=';',  encoding = 'utf-8', error_bad_lines=False)
@@ -137,7 +139,7 @@ for idx, p in enumerate(guias_rela['Nº de cadastro']):
             guias_rela.iloc[:idx].to_csv('escrita_parcial.csv', sep=';', index=False)
 
 #salvando resultado final
-if os.path.isfile('escrita_parcial.csv'):
+if lp:
     p = pd.read_csv('escrita_parcial.csv', sep=';',  encoding = 'utf-8', error_bad_lines=False)
 
     guias_rela = guias_rela.append(p)
